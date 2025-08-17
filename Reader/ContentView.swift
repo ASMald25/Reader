@@ -19,11 +19,15 @@ struct ContentView: View {
             VStack{
                 HStack{
                     //button to load pdf from file finder
-                    Button("Select PDF") {
+                    Button("Select PDF"){
                         if let file = FileFinder() {
                             selectedPDF = file
                         }
                     }
+                    .buttonStyle(.plain)
+                    .frame(minWidth: 70, idealWidth: 100, minHeight: 30, idealHeight: 40)
+                    .background(.black, in: RoundedRectangle(cornerRadius: 10))
+                    .foregroundStyle(.white)
                     //Horizontally add buttons such as highlight
                     //Toolbar everpresent at top
                     //add bookmark functionality
