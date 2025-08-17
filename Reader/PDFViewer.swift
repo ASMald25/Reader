@@ -28,8 +28,9 @@ extension NSColor {
 }
 
 enum VisualSettings {
-    static let customBackColor = NSColor(hex: "#c85637") ?? NSColor.black
-    static let complementaryColor = NSColor(hex: "#37A9C8") ?? NSColor.white
+    // nil-coalescing incase hex: fails, avoid crashing
+    static let customBackColor = NSColor(hex: "#6f301e") ?? NSColor.black
+    static let complementaryColor = NSColor(hex: "#1E5D6F") ?? NSColor.white
 }
 
 

@@ -14,7 +14,7 @@ struct ContentView: View {
     
     var body: some View {
         ZStack{
-            Color(nsColor: VisualSettings.customColor).ignoresSafeArea()
+            Color(nsColor: VisualSettings.customBackColor).ignoresSafeArea()
             
             VStack{
                 HStack{
@@ -25,8 +25,8 @@ struct ContentView: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    .frame(minWidth: 70, idealWidth: 100, minHeight: 30, idealHeight: 40)
-                    .background(.black, in: RoundedRectangle(cornerRadius: 10))
+                    .frame(minWidth: 90, idealWidth: 110, minHeight: 30, idealHeight: 40)
+                    .background(Color(VisualSettings.complementaryColor), in: RoundedRectangle(cornerRadius: 10))
                     .foregroundStyle(.white)
                     //Horizontally add buttons such as highlight
                     //Toolbar everpresent at top
