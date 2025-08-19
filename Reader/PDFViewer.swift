@@ -9,7 +9,6 @@ import SwiftUI
 import PDFKit
 import AppKit
 
-
 //turn hex into a NSColor object
 extension NSColor {
     convenience init?(hex: String, alpha: CGFloat = 1.0) {
@@ -28,28 +27,57 @@ extension NSColor {
 }
 
 enum VisualSettings {
-    // nil-coalescing incase hex: fails, avoid crashing
     static let customBackColor = NSColor(hex: "#6f301e") ?? NSColor.black
     static let complementaryColor = NSColor(hex: "#1E5D6F") ?? NSColor.white
 }
 
-
-
 struct PDFKitView: NSViewRepresentable {
     let url: URL
+    @Binding var currentPage: Int?
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
     func makeNSView(context: Context) -> PDFView {
-       let pdfView = PDFView()
-        //Reader window settings
+        let pdfView = PDFView()
         pdfView.autoScales = true
         pdfView.backgroundColor = VisualSettings.customBackColor
-        
+        context.coordinator.pdfView = pdfView
+
         if let document = PDFDocument(url: url) {
             pdfView.document = document
         }
+
+        NotificationCenter.default.addObserver(
+            context.coordinator,
+            selector: #selector(Coordinator.pageChanged(_:)),
+            name: .PDFViewPageChanged,
+            object: pdfView
+        )
+
         return pdfView
     }
-    
+
     func updateNSView(_ nsView: PDFView, context: Context) {
-        nsView.document = PDFDocument(url: url)
+        if nsView.document == nil {
+            nsView.document = PDFDocument(url: url)
+        }
+    }
+
+    class Coordinator: NSObject {
+        var parent: PDFKitView
+        var pdfView: PDFView?
+
+        init(_ parent: PDFKitView) {
+            self.parent = parent
+        }
+
+        @objc func pageChanged(_ notification: Notification) {
+            guard let pdfView = notification.object as? PDFView,
+                    let page = pdfView.currentPage,
+                    let index = pdfView.document?.index(for: page) else { return }
+            parent.currentPage = index + 1
+        }
     }
 }
