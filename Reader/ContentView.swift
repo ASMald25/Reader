@@ -7,46 +7,51 @@
 
 import SwiftUI
 import AppKit
-
+import PDFKit
 
 struct ContentView: View {
     @State private var selectedPDF: URL?
-    
+    @State private var areViewingPDFBool = false
+    @State private var currentPage: Int?
+
     var body: some View {
-        ZStack{
+        ZStack {
             Color(nsColor: VisualSettings.customBackColor).ignoresSafeArea()
-            
-            VStack{
-                HStack{
-                    //button to load pdf from file finder
-                    Button("Select PDF"){
+
+            VStack {
+                HStack {
+                    // button to load pdf from file finder
+                    Button("Select PDF") {
                         if let file = FileFinder() {
                             selectedPDF = file
+                            areViewingPDFBool = true
+                            currentPage = nil //change this code to load last page later on
                         }
                     }
                     .buttonStyle(.plain)
                     .frame(minWidth: 90, idealWidth: 110, minHeight: 30, idealHeight: 40)
                     .background(Color(VisualSettings.complementaryColor), in: RoundedRectangle(cornerRadius: 10))
                     .foregroundStyle(.white)
-                    //Horizontally add buttons such as highlight
-                    //Toolbar everpresent at top
-                    //add bookmark functionality
-                    //memory perisistance such as json in appData
-                    
-                }.padding(.top, 10)
-                
-                if let url = selectedPDF{
-                    PDFKitView(url: url).frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    //unused
+
+                    if areViewingPDFBool {
+                        Button("Bookmark Page") {
+                            if let page = currentPage {
+                                print("Bookmarked page \(page)")
+                            }
+                        }
+                    }
                 }
-                
+                .padding(.top, 10)
+
+                if let url = selectedPDF {
+                    PDFKitView(url: url, currentPage: $currentPage)
+                        .id(url)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
             }
         }
     }
 }
-            
-    
 
 #Preview {
     ContentView()
