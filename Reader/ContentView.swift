@@ -47,6 +47,9 @@ struct ContentView: View {
                     PDFKitView(url: url, currentPage: $currentPage)
                         .id(url)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .onAppear{
+                            print(url.lastPathComponent)
+                        }
                 }
             }
         }
