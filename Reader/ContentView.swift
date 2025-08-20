@@ -13,11 +13,13 @@ struct ContentView: View {
     @State private var selectedPDF: URL?
     @State private var areViewingPDFBool = false
     @State private var currentPage: Int?
-    @State private var bookmarksDict: [String: Bookmark]? = decodeBookmark(from: "bookmarks")
+    @State private var bookmarksDict: [String: Bookmark] = [:]
+    @State private var pdfName: String = ""
 
     var body: some View {
         ZStack {
             Color(nsColor: VisualSettings.customBackColor).ignoresSafeArea()
+            var bookmarksDict = decodeBookmark(from: "bookmarks.json")
 
             VStack {
                 HStack {
@@ -38,8 +40,15 @@ struct ContentView: View {
                         Button("Bookmark Page") {
                             if let page = currentPage {
                                 print("Bookmarked page \(page)")
+                                _ = addOrUpdateBookmark(&bookmarksDict, filename: selectedPDF!, bookmarkPgNum: page)
+                                
+                                
                             }
                         }
+                        Button("Print Dict"){
+                            for (key, value) in bookmarksDict{ print(key,":", value)}
+                        }
+                        
                     }
                 }
                 .padding(.top, 10)
