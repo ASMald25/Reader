@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var selectedPDF: URL?
     @State private var areViewingPDFBool = false
     @State private var currentPage: Int?
+    @State private var bookmarksDict: [String: Bookmark]? = decodeBookmark(from: "bookmarks")
 
     var body: some View {
         ZStack {
@@ -47,9 +48,7 @@ struct ContentView: View {
                     PDFKitView(url: url, currentPage: $currentPage)
                         .id(url)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .onAppear{
-                            print(url.lastPathComponent)
-                        }
+                   //     .onAppear{ print(url.lastPathComponent) } use to find file path
                 }
             }
         }
