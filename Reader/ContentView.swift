@@ -12,6 +12,7 @@ import PDFKit
 struct ContentView: View {
     @State private var selectedPDF: URL?
     @State private var areViewingPDFBool = false
+    @State private var haveBookMarkedBool = false
     @State private var currentPage: Int?
     @State private var bookmarksDict: [String: Bookmark] = [:]
     @State private var pdfName: String = ""
@@ -19,7 +20,6 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             Color(nsColor: VisualSettings.customBackColor).ignoresSafeArea()
-            var bookmarksDict = decodeBookmark(from: "bookmarks.json")
 
             VStack {
                 HStack {
@@ -29,6 +29,7 @@ struct ContentView: View {
                             selectedPDF = file
                             areViewingPDFBool = true
                             currentPage = nil //change this code to load last page later on
+                            
                         }
                     }
                     .buttonStyle(.plain)
@@ -37,17 +38,21 @@ struct ContentView: View {
                     .foregroundStyle(.white)
 
                     if areViewingPDFBool {
+                        var bookmarksDict = decodeBookmark(from: "bookmarks.json")
                         Button("Bookmark Page") {
                             if let page = currentPage {
                                 print("Bookmarked page \(page)")
-                                _ = addOrUpdateBookmark(&bookmarksDict, filename: selectedPDF!, bookmarkPgNum: page)
-                                
+                                haveBookMarkedBool = true
+                                pdfName = addOrUpdateBookmark(&bookmarksDict, filename: selectedPDF!, bookmarkPgNum: page)
+                                encodeBookmark(&bookmarksDict)
                                 
                             }
                         }
-                        Button("Print Dict"){
-                            for (key, value) in bookmarksDict{ print(key,":", value)}
-                        }
+                        Button("jump to bookmark"){
+                            //check that jumping to page function is correct
+                            let bookmarkNum = bookmarksDict[pdfName]?.bookmarkPgNum ?? 0
+                            currentPage = bookmarkNum
+                            }
                         
                     }
                 }

@@ -63,6 +63,18 @@ struct PDFKitView: NSViewRepresentable {
         if nsView.document == nil {
             nsView.document = PDFDocument(url: url)
         }
+        
+        //jump when currentPage is updated
+        if let targetPage = currentPage,
+           targetPage > 0,
+           targetPage <= nsView.document?.pageCount ?? 0,
+           let page = nsView.document?.page(at: targetPage - 1) {
+            nsView.go(to: page)
+        }
+    }
+    
+    func jumpToPage(_ pageNumber: Int, context: Context){
+        context.coordinator.goToPage(pageNumber)
     }
 
     class Coordinator: NSObject {
@@ -78,6 +90,19 @@ struct PDFKitView: NSViewRepresentable {
                     let page = pdfView.currentPage,
                     let index = pdfView.document?.index(for: page) else { return }
             parent.currentPage = index + 1
+        }
+        
+        func goToPage(_ pageNumber: Int){
+            guard let pdfView = pdfView,
+                  let document = pdfView.document,
+                  pageNumber > 0,
+                  pageNumber <= document.pageCount,
+                    let page = document.page(at: pageNumber - 1) else{
+                print("Invalid page number", pageNumber)
+                return
+            }
+            pdfView.go(to: page)
+        
         }
     }
 }
