@@ -11,6 +11,7 @@ import Foundation
 struct Bookmark: Codable {
     let fileName: String
     let bookmarkPgNum: Int
+    var lastPageOpened: Int = 0
 }
 
 // Dictionary to check if PDF has been bookmarked before or to create new bookmarks
@@ -20,6 +21,18 @@ func addOrUpdateBookmark(_ dict: inout [String: Bookmark], filename: URL, bookma
     dict[pdfName] = Bookmark(fileName: pdfName, bookmarkPgNum: bookmarkPgNum)
     return pdfName
 }
+
+func saveLastPage(_ dict: inout[String:Bookmark], currentPage: Int, pdfName: String){
+    let pdfName = pdfName
+    if var bookmark = dict[pdfName]{
+        bookmark.lastPageOpened = currentPage
+        dict[pdfName] = bookmark
+    }else {
+        dict[pdfName] = Bookmark(fileName: pdfName, bookmarkPgNum: 0, lastPageOpened: currentPage)
+    }
+}
+
+
 
 // Create the JSON file if it doesn't exist
 func createJSON(fileName: String = "bookmarks.json") {
