@@ -9,7 +9,7 @@ import SwiftUI
 import PDFKit
 import AppKit
 
-//turn hex into a NSColor object
+// Turn hex into a NSColor object
 extension NSColor {
     convenience init?(hex: String, alpha: CGFloat = 1.0) {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -60,26 +60,31 @@ struct PDFKitView: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: PDFView, context: Context) {
+        // Ensure document is loaded
         if nsView.document == nil {
             nsView.document = PDFDocument(url: url)
         }
-        
-        //jump when currentPage is updated
+
+        // Only jump if the current page is different from the PDFView's page
         if let targetPage = currentPage,
+           let document = nsView.document,
            targetPage > 0,
-           targetPage <= nsView.document?.pageCount ?? 0,
-           let page = nsView.document?.page(at: targetPage - 1) {
+           targetPage <= document.pageCount,
+           let page = document.page(at: targetPage - 1),
+           nsView.currentPage != page {
             nsView.go(to: page)
         }
     }
-    
-    func jumpToPage(_ pageNumber: Int, context: Context){
+
+    func jumpToPage(_ pageNumber: Int, context: Context) {
         context.coordinator.goToPage(pageNumber)
     }
 
     class Coordinator: NSObject {
         var parent: PDFKitView
-        var pdfView: PDFView?
+        weak var pdfView: PDFView?
+
+        private var lastReportedPage: Int? = nil
 
         init(_ parent: PDFKitView) {
             self.parent = parent
@@ -87,22 +92,30 @@ struct PDFKitView: NSViewRepresentable {
 
         @objc func pageChanged(_ notification: Notification) {
             guard let pdfView = notification.object as? PDFView,
-                    let page = pdfView.currentPage,
-                    let index = pdfView.document?.index(for: page) else { return }
-            parent.currentPage = index + 1
+                  let page = pdfView.currentPage,
+                  let index = pdfView.document?.index(for: page) else { return }
+
+            let pageNumber = index + 1
+            // Only update binding if page actually changed
+            if lastReportedPage != pageNumber {
+                lastReportedPage = pageNumber
+                parent.currentPage = pageNumber
+            }
         }
-        
-        func goToPage(_ pageNumber: Int){
+
+        func goToPage(_ pageNumber: Int) {
             guard let pdfView = pdfView,
                   let document = pdfView.document,
                   pageNumber > 0,
                   pageNumber <= document.pageCount,
-                    let page = document.page(at: pageNumber - 1) else{
+                  let page = document.page(at: pageNumber - 1) else {
                 print("Invalid page number", pageNumber)
                 return
             }
+
             pdfView.go(to: page)
-        
+            lastReportedPage = pageNumber
+            parent.currentPage = pageNumber
         }
     }
 }
